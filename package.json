@@ -1,0 +1,35 @@
+{
+  "name": "amsb",
+  "version": "1.0.1",
+  "description": "Admission  enquiry system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "lint": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "enquiry",
+    "admisson",
+    "school",
+    "data",
+    "point"
+  ],
+  "author": "Subham Kumar Mishra",
+  "license": "ISC",
+  "dependencies": {
+    "compression": "^1.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.5",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.3"
+  }
+}
