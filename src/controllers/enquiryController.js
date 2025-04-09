@@ -1,5 +1,103 @@
-// Testing Application And Services
+const multer = require('multer')
+const path = require('path')
+const EnquiryForm = require('../models/enquirySchema')
 
+//  method for enquiry form submit
+const submitEnquiryForm = async (req, res) => {
+  try {
+    const {
+      studentName,
+      adharCardNo,
+      std,
+      dob,
+      email,
+      fatherName,
+      fatherAdharCardNo,
+      fatherMobileNo,
+      fatherEmail,
+      motherName,
+      motherAdharCardNo,
+      motherMobileNo,
+      motherEmail,
+      placeOfBirth,
+      pincode,
+      city,
+      district,
+      state,
+      religion,
+      motherTongue
+    } = req.body
+
+    // Required fields map
+    const requiredFields = {
+      studentName,
+      adharCardNo,
+      std,
+      dob,
+      email,
+      fatherName,
+      fatherAdharCardNo,
+      fatherMobileNo,
+      fatherEmail,
+      motherName,
+      motherAdharCardNo,
+      motherMobileNo,
+      motherEmail,
+      placeOfBirth,
+      pincode,
+      city,
+      district,
+      state,
+      religion,
+      motherTongue
+    }
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(
+        ([_, value]) =>
+          !value || (typeof value === 'string' && value.trim() === '')
+      )
+      .map(([key]) => key)
+
+    if (missingFields.length > 0) {
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: `Missing required field(s): ${missingFields.join(', ')}`
+      })
+    }
+
+    const formData = { ...req.body }
+
+    if (req.files?.familyPhoto?.[0]) {
+      formData.familyPhoto = `/AMS/enquiry/v1/uploads/familyPhoto/${req.files.familyPhoto[0].filename}`
+    }
+
+    if (req.files?.passportPhoto?.[0]) {
+      formData.passportPhoto = `/AMS/enquiry/v1/uploads/passportPhoto/${req.files.passportPhoto[0].filename}`
+    }
+
+    const newEnquiry = new EnquiryForm(formData)
+    await newEnquiry.save()
+
+    res.status(201).json({
+      status: 201,
+      success: true,
+      message: 'Enquiry form submitted successfully.',
+      data: newEnquiry
+    })
+  } catch (error) {
+    console.error('Error submitting enquiry form:', error)
+    res.status(500).json({
+      staus: 500,
+      success: false,
+      message: error.message,
+      error: error.message
+    })
+  }
+}
+
+// Testing Application And Services
 const testFunction = async (req, res) => {
   try {
     res.setHeader('Content-Type', 'text/html')
@@ -43,4 +141,4 @@ const testFunction = async (req, res) => {
   }
 }
 
-module.exports = { testFunction }
+module.exports = { testFunction, submitEnquiryForm }
