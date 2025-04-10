@@ -4,6 +4,7 @@ const enquiryController = require('../controllers/enquiryController')
 const upload = require('../utils/multerConfig')
 
 router.get('/test', enquiryController.testFunction)
+router.get('/enquiry/list', enquiryController.getEnquiries)
 router.post(
   '/submitForm',
   upload.fields([

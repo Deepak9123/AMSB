@@ -97,6 +97,62 @@ const submitEnquiryForm = async (req, res) => {
   }
 }
 
+// method for get enquiry data
+const getEnquiries = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      enquiryFormId,
+      studentName,
+      adharCardNo,
+      fatherMobileNo,
+      motherMobileNo,
+      email,
+    } = req.query;
+
+    const filters = {};
+
+    if (enquiryFormId) filters.enquiryFormId = { $regex: enquiryFormId, $options: 'i' };
+    if (studentName) filters.studentName = { $regex: studentName, $options: 'i' };
+    if (adharCardNo) filters.adharCardNo = { $regex: adharCardNo, $options: 'i' };
+    if (fatherMobileNo) filters.fatherMobileNo = { $regex: fatherMobileNo, $options: 'i' };
+    if (motherMobileNo) filters.motherMobileNo = { $regex: motherMobileNo, $options: 'i' };
+    if (email) filters.email = { $regex: email, $options: 'i' };
+
+    const skip = (page - 1) * limit;
+
+    const [total, enquiries] = await Promise.all([
+      EnquiryForm.countDocuments(filters),
+      EnquiryForm.find(filters)
+        .select('-__v -_id') // 👌 Clean response
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+    ]);
+
+    res.status(200).json({
+      status:200,
+      success: true,
+      message: 'Enquiries fetched successfully',
+      data: enquiries,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching enquiries:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch enquiry list',
+      error: error.message,
+    });
+  }
+};
+
 // Testing Application And Services
 const testFunction = async (req, res) => {
   try {
@@ -141,4 +197,4 @@ const testFunction = async (req, res) => {
   }
 }
 
-module.exports = { testFunction, submitEnquiryForm }
+module.exports = { testFunction, submitEnquiryForm ,getEnquiries}
