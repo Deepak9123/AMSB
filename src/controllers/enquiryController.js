@@ -1,5 +1,4 @@
-const multer = require('multer')
-const path = require('path')
+const mongoose = require('mongoose')
 const EnquiryForm = require('../models/enquirySchema')
 
 //  method for enquiry form submit
@@ -70,11 +69,11 @@ const submitEnquiryForm = async (req, res) => {
     const formData = { ...req.body }
 
     if (req.files?.familyPhoto?.[0]) {
-      formData.familyPhoto = `/AMS/enquiry/v1/uploads/familyPhoto/${req.files.familyPhoto[0].filename}`
+      formData.familyPhoto = `http://localhost:6600/AMS/enquiry/v1/uploads/familyPhoto/${req.files.familyPhoto[0].filename}`
     }
 
     if (req.files?.passportPhoto?.[0]) {
-      formData.passportPhoto = `/AMS/enquiry/v1/uploads/passportPhoto/${req.files.passportPhoto[0].filename}`
+      formData.passportPhoto = `http://localhost:6600/AMS/enquiry/v1/uploads/passportPhoto/${req.files.passportPhoto[0].filename}`
     }
 
     const newEnquiry = new EnquiryForm(formData)
@@ -153,6 +152,143 @@ const getEnquiries = async (req, res) => {
   }
 };
 
+
+// method for update enquiry data
+const updateEnquiryForm = async (req, res) => {
+  try {
+    const {
+      enquiryFormId, // custom ID field
+      studentName,
+      adharCardNo,
+      std,
+      dob,
+      email,
+      fatherName,
+      fatherAdharCardNo,
+      fatherMobileNo,
+      fatherEmail,
+      motherName,
+      motherAdharCardNo,
+      motherMobileNo,
+      motherEmail,
+      placeOfBirth,
+      pincode,
+      city,
+      district,
+      state,
+      religion,
+      motherTongue
+    } = req.body;
+
+    // Check if the enquiryFormId is provided
+    if (!enquiryFormId) {
+      return res.status(400).json({
+        status: 400,
+        success: false,
+        message: 'Enquiry Form ID is required to update the record.'
+      });
+    }
+
+    // Required fields map
+    const requiredFields = {
+      studentName,
+      adharCardNo,
+      std,
+      dob,
+      email,
+      fatherName,
+      fatherAdharCardNo,
+      fatherMobileNo,
+      fatherEmail,
+      motherName,
+      motherAdharCardNo,
+      motherMobileNo,
+      motherEmail,
+      placeOfBirth,
+      pincode,
+      city,
+      district,
+      state,
+      religion,
+      motherTongue
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(
+        ([_, value]) =>
+          !value || (typeof value === 'string' && value.trim() === '')
+      )
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        status: 400,
+        success: false,
+        message: `Missing required field(s): ${missingFields.join(', ')}`
+      });
+    }
+
+    // Find the existing enquiry form by custom enquiryFormId
+    const existingEnquiry = await EnquiryForm.findOne({ enquiryFormId });
+    if (!existingEnquiry) {
+      return res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'Enquiry form not found.'
+      });
+    }
+
+    // Prepare the updated data
+    const updatedData = { ...req.body };
+
+    // Handle file uploads (if any)
+    if (req.files?.familyPhoto?.[0]) {
+      updatedData.familyPhoto = `/AMS/enquiry/v1/uploads/familyPhoto/${req.files.familyPhoto[0].filename}`;
+    } else {
+      updatedData.familyPhoto = existingEnquiry.familyPhoto; // Keep the old photo
+    }
+
+    if (req.files?.passportPhoto?.[0]) {
+      updatedData.passportPhoto = `/AMS/enquiry/v1/uploads/passportPhoto/${req.files.passportPhoto[0].filename}`;
+    } else {
+      updatedData.passportPhoto = existingEnquiry.passportPhoto; // Keep the old passport photo
+    }
+
+    // Update the record in the database
+    const updatedEnquiry = await EnquiryForm.findOneAndUpdate(
+      { enquiryFormId }, // Use custom enquiryFormId instead of _id
+      updatedData,
+      { new: true } // To return the updated record
+    );
+
+    if (!updatedEnquiry) {
+      return res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'Error updating the enquiry form.'
+      });
+    }
+
+    // Return the updated enquiry form
+    res.status(200).json({
+      status: 200,
+      success: true,
+      message: 'Enquiry form updated successfully.',
+      data: updatedEnquiry
+    });
+  } catch (error) {
+    console.error('Error updating enquiry form:', error);
+    res.status(500).json({
+      status: 500,
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+
+
 // Testing Application And Services
 const testFunction = async (req, res) => {
   try {
@@ -197,4 +333,4 @@ const testFunction = async (req, res) => {
   }
 }
 
-module.exports = { testFunction, submitEnquiryForm ,getEnquiries}
+module.exports = { testFunction, submitEnquiryForm ,getEnquiries,updateEnquiryForm}
