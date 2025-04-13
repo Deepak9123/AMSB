@@ -8,7 +8,7 @@ const enquiryFormSchema = new mongoose.Schema({
   studentName: { type: String, required: true },
   adharCardNo: { type: String, required: true, match: /^[0-9]{12}$/ },
   std: { type: String, required: true },
-  dob: { type: Date, required: true },
+  dob: { type: String, required: true },
   email: { type: String, required: true, match: /^\S+@\S+\.\S+$/ },
   pwd: String,
   appId: String,
@@ -31,6 +31,8 @@ const enquiryFormSchema = new mongoose.Schema({
   motherTongue: { type: String, required: true },
   familyPhoto: { type: String },
   passportPhoto: { type: String },
+  admissionStatus: { type: String },
+  paymentStatus: { type: String },
   createdAt: {
     type: Date,
     default: Date.now

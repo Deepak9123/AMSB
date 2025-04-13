@@ -66,7 +66,10 @@ const submitEnquiryForm = async (req, res) => {
       })
     }
 
-    const formData = { ...req.body }
+    const formData = { ...req.body };
+
+    formData.admissionStatus ='Pending'
+    formData.paymentStatus ='Not Receive'
 
     if (req.files?.familyPhoto?.[0]) {
       formData.familyPhoto = `http://localhost:6600/AMS/enquiry/v1/uploads/familyPhoto/${req.files.familyPhoto[0].filename}`
