@@ -1,6 +1,6 @@
 const _mongo = require('mongoose')
 require('dotenv').config()
-const _dbUrl = process.env.MONGOURL
+const _dbUrl = process.env.MONGO_URL || "mongodb://localhost:27017/AMSDB"
 
 const dbConnectionfun = _mongo
   .connect(_dbUrl, {
